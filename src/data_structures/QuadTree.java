@@ -11,8 +11,8 @@ public class QuadTree {
 	
 	public AABB b_box;
 	
-	private ArrayList<Object> objects;
-	private ArrayList<Point> points;
+	public ArrayList<Object> objects;
+	public ArrayList<Point> points;
 	private int capacity;
 	private static final int defaultCapacity = 4;
 	
@@ -46,6 +46,51 @@ public class QuadTree {
 		return false;
 	}
 	
+	/*
+	public void rotateLeft(){
+		QuadTree temp1 = nw;
+		QuadTree temp2 = sw;
+		nw = ne;
+		sw = se;
+		ne = nw;
+		sw = se;
+	}
+	*/
+	
+	public ArrayList<Object> getAllEast(){
+		ArrayList<Object> dataInRange = new ArrayList<Object>();
+		dataInRange.addAll(ne.getAllChildren());
+		dataInRange.addAll(se.getAllChildren());
+		return dataInRange;
+	}
+	
+	public ArrayList<Object> getAllWest(){
+		ArrayList<Object> dataInRange = new ArrayList<Object>();
+		dataInRange.addAll(nw.getAllChildren());
+		dataInRange.addAll(sw.getAllChildren());
+		return dataInRange;
+	}
+	
+	public ArrayList<Object> getAllNorth(){
+		ArrayList<Object> dataInRange = new ArrayList<Object>();
+		dataInRange.addAll(ne.getAllChildren());
+		dataInRange.addAll(nw.getAllChildren());
+		return dataInRange;
+	}
+	
+	public ArrayList<Object> getAllSouth(){
+		ArrayList<Object> dataInRange = new ArrayList<Object>();
+		dataInRange.addAll(se.getAllChildren());
+		dataInRange.addAll(sw.getAllChildren());
+		return dataInRange;
+	}
+	
+	public ArrayList<Object> getAllChildren(){
+		ArrayList<Object> dataInRange = new ArrayList<Object>();
+		dataInRange.addAll(queryRange(b_box));
+		return dataInRange;
+	}
+	
 	public ArrayList<Object> queryRange(AABB range){
 		ArrayList<Object> dataInRange = new ArrayList<Object>();
 		
@@ -70,6 +115,69 @@ public class QuadTree {
 	    dataInRange.addAll(sw.queryRange(range));
 
 
+	    return dataInRange;
+	}
+	
+	public ArrayList<Object> queryRangeCircular(AABB range){
+		//Create Array of Ranges to Check
+		ArrayList<AABB> ranges = new ArrayList<AABB>();
+		//Add Initial Range to Check
+		range.center = pointToCircularPoint(range.center);
+		
+		ranges.add(range);
+		//Create generic point data for checking
+		float rectLeft = range.center.x - range.halfDimension;
+		float rectRight = range.center.x + range.halfDimension;
+		float rectTop = range.center.y + range.halfDimension;
+		float rectBottom = range.center.y - range.halfDimension;
+		float qtLeft = b_box.center.x - b_box.halfDimension;
+		float qtRight = b_box.center.x + b_box.halfDimension;
+		float qtTop = b_box.center.y + b_box.halfDimension;
+		float qtBottom = b_box.center.y - b_box.halfDimension;
+		//Perform checks and create AABBs to add to range
+		boolean top = false, bottom = false, left = false, right = false;
+		float rangeHalfDimension = range.halfDimension;
+		if(rectLeft < qtLeft){
+			right = true;
+			AABB rightAABB = new AABB(new Point(range.center.x - qtLeft + qtRight,range.center.y), rangeHalfDimension);
+			ranges.add(rightAABB);
+		}else if(rectRight > qtRight){
+			left = true;
+			AABB leftAABB = new AABB(new Point(qtLeft - (qtRight - range.center.x),range.center.y), rangeHalfDimension);
+			ranges.add(leftAABB);
+		}
+		if(rectTop > qtTop){
+			bottom = true;
+			AABB bottomAABB = new AABB(new Point(range.center.x,qtBottom - range.center.y + qtTop), rangeHalfDimension);
+			ranges.add(bottomAABB);
+		}else if(rectBottom < qtBottom){
+			top = true;
+			AABB topAABB = new AABB(new Point(range.center.x,qtTop + (range.center.y - qtBottom)), rangeHalfDimension);
+			ranges.add(topAABB);
+		}
+		if(bottom && right){
+			AABB bottomRightAABB = new AABB(new Point(range.center.x - qtLeft + qtRight,
+					qtBottom - range.center.y + qtTop), rangeHalfDimension);
+			ranges.add(bottomRightAABB);
+		}else if(top && right){
+			AABB topRightAABB = new AABB(new Point(range.center.x - qtLeft + qtRight,
+					qtTop + (range.center.y - qtBottom)), rangeHalfDimension);
+			ranges.add(topRightAABB);
+		}else if(bottom && left){
+			AABB bottomLeftAABB = new AABB(new Point(qtLeft - (qtRight - range.center.x),
+					qtBottom - range.center.y + qtTop), rangeHalfDimension);
+			ranges.add(bottomLeftAABB);
+		}else if(top && left){
+			AABB topLeftAABB = new AABB(new Point(qtLeft - (qtRight - range.center.x),
+					qtTop + (range.center.y - qtBottom)), rangeHalfDimension);
+			ranges.add(topLeftAABB);
+		}
+		
+		//Create array to hold data
+		ArrayList<Object> dataInRange = new ArrayList<Object>();
+		for(int i = 0; i < ranges.size(); i++){
+			dataInRange.addAll(queryRange(ranges.get(i)));
+		}
 	    return dataInRange;
 	}
 	
@@ -115,6 +223,15 @@ public class QuadTree {
 		if(se != null){
 			se.printNode(" " + tab);
 		}
-
+	}
+	
+	private Point pointToCircularPoint(Point point){
+		if(point.x > b_box.center.x+b_box.halfDimension || point.x < b_box.center.x-b_box.halfDimension){
+			point.x = point.x + 2*b_box.halfDimension % 2*b_box.halfDimension;
+		}
+		if(point.y > b_box.center.y+b_box.halfDimension || point.y < b_box.center.y-b_box.halfDimension){
+			point.y = point.y + 2*b_box.halfDimension % 2*b_box.halfDimension;
+		}
+		return point;
 	}
 }

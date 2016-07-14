@@ -39,7 +39,10 @@ public class AABB {
 				y1_1 < y2_2 && y2_1 > y1_2) {
 			return false;
 		}
-		System.out.println("true");
 		return true;
+	}
+	
+	public String toString(){
+		return "(" + center.x + "," + center.y + ") with half dimension of : " + halfDimension;
 	}
 }

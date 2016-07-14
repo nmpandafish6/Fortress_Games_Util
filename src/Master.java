@@ -1,3 +1,7 @@
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import data_structure_gui.QuadTreeGUI;
 import data_structures.*;
 
 public class Master {
@@ -10,16 +14,26 @@ public class Master {
 		qt.add("(1,-1)", new Point(1,-1));
 		qt.add("(-1,1)", new Point(-1,1));
 		qt.add("(-1,-1)", new Point(-1,-1));
-		qt.add("(2,2)", new Point(2,2));
-		qt.add("(2,5)", new Point(2,5));
-
-		qt.add("(2,4)", new Point(2,4));
-
-		qt.add("(2,3)", new Point(2,3));
-		qt.add("(8,3)", new Point(8,3));
 		
-		qt.printQuadTree();
-		System.out.println(qt.queryRange(new AABB(new Point(5,5), 5)));
+		qt.add("(0,9)", new Point(0,9));
+		qt.add("(0,-9)", new Point(0,-9));
+		qt.add("(-9,0)", new Point(-9,0));
+		qt.add("(9,0)", new Point(9,0));
+
+		qt.add("(9,9)", new Point(9,9));
+		qt.add("(9,-9)", new Point(9,-9));
+		qt.add("(-9,9)", new Point(-9,9));
+		qt.add("(-9,-9)", new Point(-9,-9));
+		
+		//qt.printQuadTree();
+		System.out.println(qt.queryRangeCircular(new AABB(new Point(-10,10), 3)));
+		
+		JPanel qt_gui = QuadTreeGUI.drawQuadTree(qt, 500, 500);
+		
+		JFrame frame = new JFrame();
+		frame.add(qt_gui);
+		frame.pack();
+		frame.setVisible(true);
 	}
 
 }
